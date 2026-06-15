@@ -1,5 +1,6 @@
 export type ContentType = 'article' | 'scam_file' | 'topic';
 export type RiskLevel = 'low' | 'medium' | 'high';
+export type DisplayFormat = 'post' | 'clip' | 'file';
 
 export interface RegionSeed {
   code: string;
@@ -13,7 +14,9 @@ export interface RegionSeed {
 export interface ContentSeed {
   slug: string;
   type: ContentType;
+  displayFormat: DisplayFormat;
   title: string;
+  hook: string;
   summary: string;
   body: string[];
   regionCodes: string[];
@@ -22,6 +25,14 @@ export interface ContentSeed {
   isEmergency: boolean;
   publishedAt: string;
   tags: string[];
+  authorName: string;
+  stats: {
+    likes: number;
+    saves: number;
+    comments: number;
+  };
+  coverTone: 'rose' | 'navy' | 'gold' | 'green' | 'ink' | 'sky';
+  durationLabel?: string;
   isPremiumPreview?: boolean;
 }
 
@@ -40,13 +51,15 @@ export const regions: RegionSeed[] = [
   { code: 'north-america', labelZh: '全北美', labelEn: 'North America', country: 'NA', activeUserCount: 61000 },
 ];
 
-export const categories = ['租房', '报税', '求职', '买车', '留学', '老人防骗'];
+export const categories = ['租房', '报税', '求职', '买车', '升学', '老人防骗'];
 
 export const contentItems: ContentSeed[] = [
   {
     slug: 'rental-deposit-before-transfer',
     type: 'scam_file',
+    displayFormat: 'clip',
     title: '租房押金转账前,先查这 5 件事',
+    hook: '房东越催你转押金,越要停 30 秒',
     summary: '低价房源、催促汇款、拒绝看房、收款人不一致,是本周 BC 和安省高频风险。',
     body: [
       '如果对方要求你先转押金再看房,先暂停。真实房东或正规中介通常可以提供可核验的身份、租约草稿和看房安排。',
@@ -58,12 +71,18 @@ export const contentItems: ContentSeed[] = [
     riskLevel: 'high',
     isEmergency: true,
     publishedAt: '2026-06-15',
-    tags: ['租房', '押金', 'e-transfer', 'wire transfer', '房源核验']
+    tags: ['租房', '押金', 'e-transfer', 'wire transfer', '房源核验'],
+    authorName: 'FANGKENG 本地雷达',
+    stats: { likes: 2840, saves: 1260, comments: 138 },
+    coverTone: 'rose',
+    durationLabel: '42s'
   },
   {
     slug: 'irs-cra-phone-scam-checklist',
     type: 'article',
+    displayFormat: 'clip',
     title: 'CRA / IRS 冒充电话:5 秒识别高危信号',
+    hook: '要 gift card 的“税务官”,先挂为敬',
     summary: '官方不会要求 gift card、加密货币、陌生链接或即时转账。先挂断,从官网入口核验。',
     body: [
       'CRA 和 IRS 不会通过电话要求你立刻购买礼品卡、提供验证码或点击陌生链接缴费。',
@@ -75,12 +94,18 @@ export const contentItems: ContentSeed[] = [
     riskLevel: 'high',
     isEmergency: true,
     publishedAt: '2026-06-14',
-    tags: ['CRA', 'IRS', 'gift card', '税务', '电话诈骗']
+    tags: ['CRA', 'IRS', 'gift card', '税务', '电话诈骗'],
+    authorName: 'FANGKENG 税务组',
+    stats: { likes: 3920, saves: 2100, comments: 246 },
+    coverTone: 'navy',
+    durationLabel: '35s'
   },
   {
     slug: 'remote-job-fake-check-warning',
     type: 'article',
+    displayFormat: 'post',
     title: '远程工作假支票骗局:收到 offer 后先别买设备',
+    hook: 'offer 到手先别笑,要你买设备先查',
     summary: '假 HR 发 offer 后寄假支票,要求你向指定供应商买电脑和软件,新人求职尤其容易中招。',
     body: [
       '正规雇主不会让新员工先用个人账户垫付大额设备费,也不会要求你把支票差额退回给第三方。',
@@ -92,12 +117,17 @@ export const contentItems: ContentSeed[] = [
     riskLevel: 'medium',
     isEmergency: false,
     publishedAt: '2026-06-12',
-    tags: ['remote job', 'fake check', 'offer', '求职']
+    tags: ['remote job', 'fake check', 'offer', '求职'],
+    authorName: '北美求职避坑笔记',
+    stats: { likes: 1680, saves: 930, comments: 81 },
+    coverTone: 'sky'
   },
   {
     slug: 'used-car-title-and-payment',
     type: 'scam_file',
+    displayFormat: 'file',
     title: '二手车 title 和付款路径怎么查',
+    hook: 'VIN 不给查?这车先别约',
     summary: '低价急售、只收现金、title 不清、VIN 不给查,都是买车前要停下来的信号。',
     body: [
       '看车前先索要 VIN,核对 title 状态、事故记录和卖家身份。不要因为“今天还有别人看车”就跳过核验。',
@@ -109,12 +139,17 @@ export const contentItems: ContentSeed[] = [
     riskLevel: 'medium',
     isEmergency: false,
     publishedAt: '2026-06-10',
-    tags: ['二手车', 'title', 'VIN', '付款']
+    tags: ['二手车', 'title', 'VIN', '付款'],
+    authorName: '车行风险档案',
+    stats: { likes: 1220, saves: 740, comments: 64 },
+    coverTone: 'ink'
   },
   {
     slug: 'school-consultant-guarantee-admission',
     type: 'topic',
+    displayFormat: 'post',
     title: '升学机构承诺保录,合同里要看什么',
+    hook: '“保录”两个字,一定要写进合同',
     summary: '保录、内部名额、限时优惠常伴随高压销售。付款前先看退款条款和服务边界。',
     body: [
       '任何“保证录取”都应回到合同文本:服务包含什么,不包含什么,失败后如何退款,谁承担材料真实性责任。',
@@ -127,12 +162,17 @@ export const contentItems: ContentSeed[] = [
     isEmergency: false,
     publishedAt: '2026-06-09',
     tags: ['升学', '保录', '合同', '退款'],
+    authorName: '留学合同观察',
+    stats: { likes: 980, saves: 860, comments: 52 },
+    coverTone: 'gold',
     isPremiumPreview: true
   },
   {
     slug: 'senior-health-product-family-check',
     type: 'article',
+    displayFormat: 'post',
     title: '给父母买保健品前,先做家庭核验',
+    hook: '父母准备现场刷卡?先打一个家庭电话',
     summary: '免费讲座、限时折扣、夸大疗效和现场刷卡,是长辈群体常见消费坑。',
     body: [
       '涉及慢性病、药物替代和高额套装时,先让家人或家庭医生一起看说明。不要在讲座现场直接刷卡。',
@@ -144,7 +184,10 @@ export const contentItems: ContentSeed[] = [
     riskLevel: 'medium',
     isEmergency: false,
     publishedAt: '2026-06-08',
-    tags: ['老人防骗', '保健品', '家庭', '退款']
+    tags: ['老人防骗', '保健品', '家庭', '退款'],
+    authorName: '长辈守护计划',
+    stats: { likes: 1460, saves: 1120, comments: 97 },
+    coverTone: 'green'
   }
 ];
 

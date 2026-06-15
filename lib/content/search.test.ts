@@ -40,4 +40,20 @@ describe('MVP content seed filtering', () => {
     expect(firstRegularIndex).toBeGreaterThan(firstEmergencyIndex);
     expect(contentItems.some((item) => item.isEmergency)).toBe(true);
   });
+
+  it('provides display metadata for social feed cards', () => {
+    expect(
+      contentItems.every(
+        (item) =>
+          ['post', 'clip', 'file'].includes(item.displayFormat) &&
+          item.hook.length > 0 &&
+          item.authorName.length > 0 &&
+          item.coverTone.length > 0 &&
+          item.stats.likes > 0 &&
+          item.stats.saves > 0 &&
+          item.stats.comments > 0
+      )
+    ).toBe(true);
+    expect(contentItems.some((item) => item.displayFormat === 'clip' && item.durationLabel)).toBe(true);
+  });
 });

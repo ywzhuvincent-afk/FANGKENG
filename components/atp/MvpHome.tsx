@@ -3,13 +3,23 @@
 import Link from 'next/link';
 import {
   IconArchive,
-  IconBook2,
+  IconBellRinging,
+  IconBookmark,
   IconChevronRight,
   IconClock,
+  IconCompass,
+  IconFlame,
+  IconHeart,
+  IconHome,
+  IconLayoutGrid,
   IconLock,
   IconMapPin,
+  IconMessageCircle,
+  IconPlayerPlay,
+  IconPlus,
   IconSearch,
   IconShieldCheck,
+  IconUser,
 } from '@tabler/icons-react';
 import { useMemo, useState } from 'react';
 import { ATPEmergencyBanner } from './EmergencyBanner';
@@ -22,11 +32,12 @@ import {
   type ContentSeed,
 } from '@/lib/content/seed';
 
+const allCategory = '全部';
 const emergencySteps = ['暂停转账或提供验证码', '截图保存聊天和链接', '从官网或公开电话重新核验'];
 
 export function MvpHome() {
   const [regionCode, setRegionCode] = useState(getDefaultRegion().code);
-  const [category, setCategory] = useState('全部');
+  const [category, setCategory] = useState(allCategory);
   const [query, setQuery] = useState('');
 
   const selectedRegion = regions.find((region) => region.code === regionCode) ?? getDefaultRegion();
@@ -34,163 +45,246 @@ export function MvpHome() {
     () =>
       filterContent({
         regionCode,
-        category: category === '全部' ? undefined : category,
+        category: category === allCategory ? undefined : category,
         query,
       }),
     [category, query, regionCode]
   );
-  const emergencyItems = filteredItems.filter((item) => item.isEmergency).slice(0, 2);
-  const regularItems = filteredItems.filter((item) => !item.isEmergency);
+  const featuredItem = filteredItems[0];
+  const feedItems = featuredItem ? filteredItems.slice(1) : filteredItems;
+  const hotItems = filteredItems.slice(0, 4);
 
   return (
-    <main className="min-h-screen bg-atp-bg-page text-atp-text-primary">
-      <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-4 py-4 sm:px-6 lg:px-8">
-        <header className="sticky top-0 z-20 -mx-4 border-b border-[var(--atp-border-1)] bg-atp-bg-page/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-          <div className="flex items-center justify-between gap-3">
-            <Link href="/" className="min-w-0">
-              <div className="text-xs text-atp-text-tertiary">Avoid The Pit</div>
-              <div className="truncate text-lg font-medium">避坑指南</div>
-            </Link>
-            <ATPFontSizeControl />
-          </div>
-          <div className="mt-3 flex items-center gap-2 overflow-x-auto pb-1">
-            {regions.slice(0, 4).map((region) => (
-              <button
-                key={region.code}
-                type="button"
-                onClick={() => setRegionCode(region.code)}
-                className={`inline-flex min-h-9 shrink-0 items-center gap-1 rounded-atp-pill border px-3 text-sm ${
-                  region.code === regionCode
-                    ? 'border-atp-text-primary bg-atp-text-primary text-white'
-                    : 'border-[var(--atp-border-1)] bg-atp-bg-card text-atp-text-secondary'
-                }`}
-              >
-                <IconMapPin className="size-4" aria-hidden="true" stroke={1.8} />
-                {region.labelZh.split(' ')[0]}
-              </button>
-            ))}
-          </div>
-        </header>
+    <main className="min-h-screen bg-[#f7f7f5] text-atp-text-primary">
+      <div className="mx-auto grid w-full max-w-7xl grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)_320px] lg:gap-6 lg:px-6">
+        <DesktopNav />
 
-        <section className="grid min-w-0 gap-6 py-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
-          <div className="min-w-0 space-y-5">
-            <section className="min-w-0 rounded-atp-xl border border-[var(--atp-border-2)] bg-atp-bg-card p-5">
-              <div className="mb-3 inline-flex items-center gap-2 rounded-atp-pill bg-atp-premium-bg px-3 py-1 text-xs text-atp-text-secondary">
-                <IconMapPin className="size-4 text-atp-premium" aria-hidden="true" stroke={1.8} />
-                当前雷达: {selectedRegion.labelZh}
-              </div>
-              <h1 className="max-w-2xl break-words text-3xl font-medium leading-tight [overflow-wrap:anywhere] sm:text-4xl">
-                先看本地高频坑,再决定要不要转账、签字、付款
-              </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-atp-text-secondary sm:text-base">
-                面向北美华人的防骗与民生政策媒体站。第一版先把租房、报税、求职、买车、留学和长辈消费风险放到一个可搜索的本地雷达里。
-              </p>
-              <div className="mt-5 flex min-w-0 flex-col gap-3 sm:flex-row">
-                <label className="relative flex-1">
-                  <span className="sr-only">搜索避坑内容</span>
-                  <IconSearch className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-atp-text-tertiary" aria-hidden="true" stroke={1.8} />
-                  <input
-                    value={query}
-                    onChange={(event) => setQuery(event.target.value)}
-                    className="min-h-12 w-full rounded-atp-lg border border-[var(--atp-border-3)] bg-atp-bg-soft pl-10 pr-3 text-base outline-none focus:border-atp-accent"
-                    placeholder="先搜一下这个坑,例如 gift card / 押金 / offer"
-                  />
-                </label>
-                <Link
-                  href="/scam-files"
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-atp-lg bg-atp-accent px-4 text-sm font-medium text-white"
+        <section className="min-w-0 pb-24 lg:pb-10">
+          <header className="sticky top-0 z-30 border-b border-[var(--atp-border-1)] bg-[#f7f7f5]/95 px-4 pb-3 pt-4 backdrop-blur lg:top-0 lg:px-0">
+            <div className="flex items-center justify-between gap-3">
+              <Link href="/" className="min-w-0">
+                <div className="text-xs text-atp-text-tertiary">Avoid The Pit</div>
+                <div className="text-xl font-medium tracking-normal">避坑指南</div>
+              </Link>
+              <ATPFontSizeControl />
+            </div>
+
+            <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+              {regions.slice(0, 4).map((region) => (
+                <button
+                  key={region.code}
+                  type="button"
+                  onClick={() => setRegionCode(region.code)}
+                  className={`inline-flex min-h-9 shrink-0 items-center gap-1 rounded-atp-pill border px-3 text-sm ${
+                    region.code === regionCode
+                      ? 'border-atp-text-primary bg-atp-text-primary text-white'
+                      : 'border-[var(--atp-border-1)] bg-white text-atp-text-secondary'
+                  }`}
                 >
-                  查看避坑档案
-                  <IconChevronRight className="size-4" aria-hidden="true" stroke={1.8} />
-                </Link>
+                  <IconMapPin className="size-4" aria-hidden="true" stroke={1.8} />
+                  {region.labelZh.split(' ')[0]}
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-3 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+              <label className="relative min-w-0">
+                <span className="sr-only">搜索避坑内容</span>
+                <IconSearch className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-atp-text-tertiary" aria-hidden="true" stroke={1.8} />
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  className="min-h-11 w-full rounded-atp-pill border border-[var(--atp-border-1)] bg-white pl-10 pr-4 text-base outline-none focus:border-atp-accent"
+                  placeholder="搜 gift card / 押金 / offer"
+                />
+              </label>
+              <Link
+                href="/scam-files"
+                className="hidden min-h-11 items-center justify-center gap-2 rounded-atp-pill bg-atp-text-primary px-4 text-sm font-medium text-white sm:inline-flex"
+              >
+                档案库
+                <IconChevronRight className="size-4" aria-hidden="true" stroke={1.8} />
+              </Link>
+            </div>
+          </header>
+
+          <div className="space-y-4 px-4 py-4 lg:px-0">
+            <section className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <div className="text-xs text-atp-text-tertiary">For {selectedRegion.labelZh}</div>
+                <h1 className="truncate text-2xl font-medium">今天先刷这些坑</h1>
+              </div>
+              <div className="inline-flex items-center gap-1 rounded-atp-pill bg-white px-3 py-2 text-sm text-atp-text-secondary">
+                <IconFlame className="size-4 text-atp-accent" aria-hidden="true" stroke={1.8} />
+                {filteredItems.length} 条
               </div>
             </section>
 
-            <ATPEmergencyBanner trigger="wire_transfer" steps={emergencySteps} ctaHref="/articles/rental-deposit-before-transfer" />
-
-            <section className="min-w-0">
-              <div className="mb-3 flex items-end justify-between gap-3">
-                <div>
-                  <div className="text-xs text-atp-text-tertiary">Local risk radar</div>
-                  <h2 className="text-xl font-medium">本地风险雷达</h2>
-                </div>
-                <span className="text-sm text-atp-text-tertiary">{filteredItems.length} 条内容</span>
-              </div>
-              <div className="flex max-w-full gap-2 overflow-x-auto pb-2">
-                {['全部', ...categories].map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    onClick={() => setCategory(item)}
-                    className={`min-h-10 shrink-0 rounded-atp-pill border px-4 text-sm ${
-                      category === item
-                        ? 'border-atp-accent bg-atp-accent text-white'
-                        : 'border-[var(--atp-border-1)] bg-atp-bg-card text-atp-text-secondary'
-                    }`}
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
-              <div className="mt-3 overflow-hidden rounded-atp-xl border border-[var(--atp-border-2)] bg-atp-bg-card">
-                {[...emergencyItems, ...regularItems].map((item) => (
-                  <ContentRow key={item.slug} item={item} />
-                ))}
-                {filteredItems.length === 0 ? (
-                  <div className="p-5 text-sm text-atp-text-secondary">暂时没有匹配内容。可以换一个关键词或地区。</div>
-                ) : null}
-              </div>
+            <section className="flex max-w-full gap-2 overflow-x-auto pb-1">
+              {[allCategory, ...categories].map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => setCategory(item)}
+                  className={`min-h-10 shrink-0 rounded-atp-pill border px-4 text-sm ${
+                    category === item
+                      ? 'border-atp-accent bg-atp-accent text-white'
+                      : 'border-[var(--atp-border-1)] bg-white text-atp-text-secondary'
+                  }`}
+                >
+                  {item}
+                </button>
+              ))}
             </section>
+
+            {featuredItem ? <FeaturedFeedCard item={featuredItem} /> : null}
+
+            <section className="overflow-hidden rounded-atp-xl border border-[rgba(255,44,85,0.14)] bg-white">
+              <ATPEmergencyBanner trigger="wire_transfer" steps={emergencySteps} ctaHref="/articles/rental-deposit-before-transfer" />
+            </section>
+
+            {feedItems.length > 0 ? (
+              <section className="grid min-w-0 gap-4 md:grid-cols-2">
+                {feedItems.map((item) => (
+                  <FeedCard key={item.slug} item={item} />
+                ))}
+              </section>
+            ) : null}
+
+            {filteredItems.length === 0 ? (
+              <section className="rounded-atp-xl border border-[var(--atp-border-1)] bg-white p-6 text-sm leading-6 text-atp-text-secondary">
+                暂时没有匹配内容。可以换一个关键词、地区或分类。
+              </section>
+            ) : null}
           </div>
-
-          <aside className="min-w-0 space-y-4 lg:sticky lg:top-28">
-            <section className="rounded-atp-xl border border-atp-premium-border bg-atp-premium-bg p-4">
-              <div className="mb-2 flex items-center gap-2 text-sm font-medium text-atp-text-primary">
-                <IconShieldCheck className="size-5 text-atp-premium" aria-hidden="true" stroke={1.8} />
-                MVP 上线范围
-              </div>
-              <p className="text-sm leading-6 text-atp-text-secondary">
-                现在开放媒体站、搜索、地区筛选和内容详情。登录、投稿、会员和微信绑定将在下一阶段接入。
-              </p>
-            </section>
-            <section className="rounded-atp-xl border border-[var(--atp-border-2)] bg-atp-bg-card p-4">
-              <h2 className="mb-3 text-base font-medium">热门专题</h2>
-              <div className="space-y-2">
-                {categories.slice(0, 5).map((item) => (
-                  <Link
-                    key={item}
-                    href={`/topics/${encodeURIComponent(item)}`}
-                    className="flex min-h-11 items-center justify-between rounded-atp-lg bg-atp-bg-soft px-3 text-sm"
-                  >
-                    {item}
-                    <IconChevronRight className="size-4 text-atp-text-tertiary" aria-hidden="true" stroke={1.8} />
-                  </Link>
-                ))}
-              </div>
-            </section>
-            <section className="rounded-atp-xl border border-[var(--atp-border-2)] bg-atp-bg-card p-4">
-              <h2 className="mb-3 text-base font-medium">即将开放</h2>
-              <div className="grid gap-2 text-sm text-atp-text-secondary">
-                <ComingSoon label="微信登录" />
-                <ComingSoon label="匿名投稿" />
-                <ComingSoon label="会员完整清单" />
-              </div>
-            </section>
-          </aside>
         </section>
+
+        <aside className="hidden min-w-0 space-y-4 py-4 lg:block">
+          <TrendPanel selectedRegion={selectedRegion.labelZh} hotItems={hotItems} />
+        </aside>
       </div>
+
+      <MobileTabs />
     </main>
   );
 }
 
-function ContentRow({ item }: { item: ContentSeed }) {
-  const href = `/articles/${item.slug}`;
+function DesktopNav() {
+  return (
+    <aside className="sticky top-0 hidden h-screen min-w-0 border-r border-[var(--atp-border-1)] py-6 pr-4 lg:block">
+      <Link href="/" className="block">
+        <div className="text-xs text-atp-text-tertiary">Avoid The Pit</div>
+        <div className="text-2xl font-medium">避坑指南</div>
+      </Link>
+      <nav className="mt-8 space-y-2">
+        <DesktopNavItem href="/" icon={<IconHome />} label="首页" active />
+        <DesktopNavItem href="/scam-files" icon={<IconArchive />} label="档案" />
+        <DesktopNavItem href="/topics/租房" icon={<IconCompass />} label="发现" />
+        <DesktopNavItem href="#" icon={<IconBellRinging />} label="消息" disabled />
+        <DesktopNavItem href="#" icon={<IconUser />} label="我的" disabled />
+      </nav>
+      <div className="mt-8 rounded-atp-xl border border-atp-premium-border bg-atp-premium-bg p-4 text-sm leading-6 text-atp-text-secondary">
+        <div className="mb-1 flex items-center gap-2 font-medium text-atp-text-primary">
+          <IconShieldCheck className="size-5 text-atp-premium" aria-hidden="true" stroke={1.8} />
+          MVP 范围
+        </div>
+        先开放内容流、搜索、地区筛选和详情页。发布、消息、会员下一阶段接入。
+      </div>
+    </aside>
+  );
+}
+
+function DesktopNavItem({
+  href,
+  icon,
+  label,
+  active,
+  disabled,
+}: {
+  href: string;
+  icon: React.ReactElement;
+  label: string;
+  active?: boolean;
+  disabled?: boolean;
+}) {
+  const content = (
+    <>
+      <span className="flex size-9 items-center justify-center rounded-atp-lg bg-white text-atp-text-secondary">
+        {cloneIcon(icon)}
+      </span>
+      <span>{label}</span>
+      {disabled ? <span className="ml-auto text-xs text-atp-text-tertiary">即将开放</span> : null}
+    </>
+  );
+
+  if (disabled) {
+    return (
+      <div className="flex min-h-12 items-center gap-3 rounded-atp-xl px-2 text-sm text-atp-text-tertiary">
+        {content}
+      </div>
+    );
+  }
 
   return (
-    <Link href={href} className="grid gap-2 border-b border-[var(--atp-border-1)] p-4 last:border-b-0 sm:grid-cols-[1fr_auto] sm:items-center">
-      <div>
+    <Link
+      href={href}
+      className={`flex min-h-12 items-center gap-3 rounded-atp-xl px-2 text-sm ${
+        active ? 'bg-atp-text-primary text-white' : 'text-atp-text-secondary hover:bg-white'
+      }`}
+    >
+      {content}
+    </Link>
+  );
+}
+
+function FeaturedFeedCard({ item }: { item: ContentSeed }) {
+  return (
+    <Link href={`/articles/${item.slug}`} className="block overflow-hidden rounded-atp-xl bg-atp-text-primary text-white shadow-sm">
+      <div className={`relative min-h-[360px] p-5 ${coverToneClass(item.coverTone)}`}>
+        <div className="absolute right-4 top-4 inline-flex items-center gap-1 rounded-atp-pill bg-black/25 px-3 py-1 text-xs text-white">
+          {item.displayFormat === 'clip' ? <IconPlayerPlay className="size-4" aria-hidden="true" stroke={1.8} /> : <IconLayoutGrid className="size-4" aria-hidden="true" stroke={1.8} />}
+          {item.durationLabel ?? formatLabel(item.displayFormat)}
+        </div>
+        <div className="flex h-full min-h-[320px] flex-col justify-between">
+          <div className="max-w-[220px] rounded-atp-xl bg-white/12 p-3 backdrop-blur">
+            <div className="text-xs opacity-80">{item.category} · {riskLabel(item.riskLevel)}</div>
+            <div className="mt-1 text-lg font-medium leading-tight">{item.hook}</div>
+          </div>
+          <div>
+            <div className="mb-3 flex items-center gap-2 text-sm opacity-90">
+              <span className="flex size-8 items-center justify-center rounded-full bg-white/20">{item.authorName.slice(0, 1)}</span>
+              <span>{item.authorName}</span>
+            </div>
+            <h2 className="text-2xl font-medium leading-tight">{item.title}</h2>
+            <p className="mt-2 line-clamp-2 text-sm leading-6 text-white/82">{item.summary}</p>
+            <StatsBar item={item} light />
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function FeedCard({ item }: { item: ContentSeed }) {
+  return (
+    <Link href={`/articles/${item.slug}`} className="block min-w-0 overflow-hidden rounded-atp-xl border border-[var(--atp-border-1)] bg-white shadow-sm">
+      <div className={`relative min-h-[190px] p-4 text-white ${coverToneClass(item.coverTone)}`}>
+        <div className="flex items-center justify-between gap-2">
+          <span className="rounded-atp-pill bg-white/18 px-3 py-1 text-xs">{formatLabel(item.displayFormat)}</span>
+          {item.durationLabel ? (
+            <span className="inline-flex items-center gap-1 rounded-atp-pill bg-black/22 px-2 py-1 text-xs">
+              <IconPlayerPlay className="size-3.5" aria-hidden="true" stroke={1.8} />
+              {item.durationLabel}
+            </span>
+          ) : null}
+        </div>
+        <div className="mt-10 max-w-[230px]">
+          <div className="text-sm opacity-82">{item.authorName}</div>
+          <div className="mt-2 text-xl font-medium leading-tight">{item.hook}</div>
+        </div>
+      </div>
+      <div className="p-4">
         <div className="mb-2 flex flex-wrap items-center gap-2 text-xs text-atp-text-tertiary">
-          <TypeBadge type={item.type} />
           <RiskBadge level={item.riskLevel} />
           <span>{item.category}</span>
           <span>{item.publishedAt}</span>
@@ -202,27 +296,150 @@ function ContentRow({ item }: { item: ContentSeed }) {
           ) : null}
         </div>
         <h3 className="font-medium leading-snug">{item.title}</h3>
-        <p className="mt-1 text-sm leading-6 text-atp-text-secondary">{item.summary}</p>
+        <p className="mt-1 line-clamp-2 text-sm leading-6 text-atp-text-secondary">{item.summary}</p>
+        <StatsBar item={item} />
       </div>
-      <IconChevronRight className="hidden size-5 text-atp-text-tertiary sm:block" aria-hidden="true" stroke={1.8} />
     </Link>
   );
 }
 
-function TypeBadge({ type }: { type: ContentSeed['type'] }) {
-  const label = type === 'scam_file' ? '骗局档案' : type === 'topic' ? '专题' : '文章';
-  const Icon = type === 'scam_file' ? IconArchive : IconBook2;
+function StatsBar({ item, light }: { item: ContentSeed; light?: boolean }) {
+  const className = light ? 'text-white/86' : 'text-atp-text-tertiary';
 
   return (
-    <span className="inline-flex items-center gap-1 rounded-atp-sm bg-atp-bg-soft px-2 py-1 text-atp-text-secondary">
-      <Icon className="size-3.5" aria-hidden="true" stroke={1.8} />
-      {label}
-    </span>
+    <div className={`mt-4 flex items-center gap-4 text-xs ${className}`}>
+      <span className="inline-flex items-center gap-1">
+        <IconHeart className="size-4" aria-hidden="true" stroke={1.8} />
+        {compactNumber(item.stats.likes)}
+      </span>
+      <span className="inline-flex items-center gap-1">
+        <IconBookmark className="size-4" aria-hidden="true" stroke={1.8} />
+        {compactNumber(item.stats.saves)}
+      </span>
+      <span className="inline-flex items-center gap-1">
+        <IconMessageCircle className="size-4" aria-hidden="true" stroke={1.8} />
+        {compactNumber(item.stats.comments)}
+      </span>
+    </div>
+  );
+}
+
+function TrendPanel({ selectedRegion, hotItems }: { selectedRegion: string; hotItems: ContentSeed[] }) {
+  return (
+    <>
+      <section className="rounded-atp-xl border border-[var(--atp-border-1)] bg-white p-4">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="font-medium">本地热榜</h2>
+          <span className="text-xs text-atp-text-tertiary">{selectedRegion}</span>
+        </div>
+        <div className="space-y-3">
+          {hotItems.map((item, index) => (
+            <Link key={item.slug} href={`/articles/${item.slug}`} className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 rounded-atp-lg bg-[#f7f7f5] p-3">
+              <span className="flex size-7 items-center justify-center rounded-atp-md bg-white text-sm font-medium text-atp-accent">
+                {index + 1}
+              </span>
+              <span className="min-w-0">
+                <span className="block truncate text-sm font-medium">{item.hook}</span>
+                <span className="mt-1 block text-xs text-atp-text-tertiary">{compactNumber(item.stats.saves)} 人收藏</span>
+              </span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-atp-xl border border-[var(--atp-border-1)] bg-white p-4">
+        <h2 className="mb-3 font-medium">热门专题</h2>
+        <div className="grid grid-cols-2 gap-2">
+          {categories.map((item) => (
+            <Link key={item} href={`/topics/${encodeURIComponent(item)}`} className="flex min-h-11 items-center justify-between rounded-atp-lg bg-[#f7f7f5] px-3 text-sm">
+              {item}
+              <IconChevronRight className="size-4 text-atp-text-tertiary" aria-hidden="true" stroke={1.8} />
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-atp-xl border border-atp-premium-border bg-atp-premium-bg p-4">
+        <h2 className="mb-3 font-medium">即将开放</h2>
+        <div className="space-y-2 text-sm text-atp-text-secondary">
+          {['发布避坑笔记', '消息提醒', '我的收藏'].map((label) => (
+            <div key={label} className="flex min-h-10 items-center justify-between rounded-atp-lg bg-white/60 px-3">
+              <span>{label}</span>
+              <span className="inline-flex items-center gap-1 text-xs text-atp-text-tertiary">
+                <IconClock className="size-3.5" aria-hidden="true" stroke={1.8} />
+                即将开放
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
+    </>
+  );
+}
+
+function MobileTabs() {
+  return (
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--atp-border-1)] bg-white/95 px-3 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 backdrop-blur lg:hidden">
+      <div className="mx-auto grid max-w-md grid-cols-5 items-end gap-1">
+        <MobileTab href="/" icon={<IconHome />} label="首页" active />
+        <MobileTab href="/topics/租房" icon={<IconCompass />} label="发现" />
+        <MobileTab href="#" icon={<IconPlus />} label="发布" primary disabled />
+        <MobileTab href="#" icon={<IconMessageCircle />} label="消息" disabled />
+        <MobileTab href="#" icon={<IconUser />} label="我的" disabled />
+      </div>
+    </nav>
+  );
+}
+
+function MobileTab({
+  href,
+  icon,
+  label,
+  active,
+  primary,
+  disabled,
+}: {
+  href: string;
+  icon: React.ReactElement;
+  label: string;
+  active?: boolean;
+  primary?: boolean;
+  disabled?: boolean;
+}) {
+  const inner = (
+    <>
+      <span
+        className={`flex items-center justify-center ${
+          primary
+            ? 'mx-auto -mt-5 size-12 rounded-full bg-atp-accent text-white shadow-lg'
+            : 'mx-auto size-6'
+        }`}
+      >
+        {cloneIcon(icon, primary ? 'size-6' : 'size-5')}
+      </span>
+      <span className={`mt-1 block text-center text-[11px] ${active ? 'font-medium text-atp-text-primary' : 'text-atp-text-tertiary'}`}>
+        {label}
+      </span>
+    </>
+  );
+
+  if (disabled) {
+    return (
+      <div className="min-w-0" aria-disabled="true">
+        {inner}
+      </div>
+    );
+  }
+
+  return (
+    <Link href={href} className="min-w-0">
+      {inner}
+    </Link>
   );
 }
 
 function RiskBadge({ level }: { level: ContentSeed['riskLevel'] }) {
-  const label = level === 'high' ? '高风险' : level === 'medium' ? '中风险' : '低风险';
+  const label = riskLabel(level);
   const className =
     level === 'high'
       ? 'bg-atp-accent-bg text-atp-accent-dark'
@@ -233,14 +450,41 @@ function RiskBadge({ level }: { level: ContentSeed['riskLevel'] }) {
   return <span className={`rounded-atp-sm px-2 py-1 ${className}`}>{label}</span>;
 }
 
-function ComingSoon({ label }: { label: string }) {
+function riskLabel(level: ContentSeed['riskLevel']) {
+  if (level === 'high') return '高风险';
+  if (level === 'medium') return '中风险';
+  return '低风险';
+}
+
+function formatLabel(format: ContentSeed['displayFormat']) {
+  if (format === 'clip') return '短避坑';
+  if (format === 'file') return '档案';
+  return '笔记';
+}
+
+function compactNumber(value: number) {
+  if (value >= 10000) return `${(value / 10000).toFixed(1)}万`;
+  if (value >= 1000) return `${(value / 1000).toFixed(1)}k`;
+  return String(value);
+}
+
+function coverToneClass(tone: ContentSeed['coverTone']) {
+  const classes: Record<ContentSeed['coverTone'], string> = {
+    rose: 'bg-atp-accent',
+    navy: 'bg-atp-trust',
+    gold: 'bg-atp-premium',
+    green: 'bg-atp-success',
+    ink: 'bg-[#202020]',
+    sky: 'bg-[#2f6f9f]',
+  };
+
+  return classes[tone];
+}
+
+function cloneIcon(icon: React.ReactElement, className = 'size-5') {
   return (
-    <div className="flex min-h-10 items-center justify-between rounded-atp-lg bg-atp-bg-soft px-3">
-      <span>{label}</span>
-      <span className="inline-flex items-center gap-1 text-xs text-atp-text-tertiary">
-        <IconClock className="size-3.5" aria-hidden="true" stroke={1.8} />
-        即将开放
-      </span>
-    </div>
+    <span className={className} aria-hidden="true">
+      {icon}
+    </span>
   );
 }
