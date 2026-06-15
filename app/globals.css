@@ -1,0 +1,100 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Backgrounds */
+    --atp-bg-page: #f5f1ea;
+    --atp-bg-card: #fffefb;
+    --atp-bg-soft: #faf6ee;
+    --atp-bg-divider: #faf6ee;
+
+    /* Text */
+    --atp-text-primary: #1a1a1a;
+    --atp-text-secondary: #4a4a4a;
+    --atp-text-tertiary: #8c8c8c;
+    --atp-text-disabled: #c0c0c0;
+
+    /* Accent - 红色 */
+    --atp-accent: #ff2c55;
+    --atp-accent-dark: #c81e3f;
+    --atp-accent-bg: #fff1f4;
+
+    /* Trust - 海军蓝 */
+    --atp-trust: #1a2e4a;
+    --atp-trust-light: #3a5278;
+
+    /* Premium - 金色 */
+    --atp-premium: #c9a356;
+    --atp-premium-bg: #fbf5e8;
+    --atp-premium-border: #e6cb89;
+
+    /* Status */
+    --atp-success: #18a058;
+    --atp-success-bg: #e8f4ec;
+    --atp-warning: #f0993e;
+    --atp-warning-bg: #fff4e5;
+
+    /* Borders */
+    --atp-border-1: rgba(0, 0, 0, 0.06);
+    --atp-border-2: rgba(0, 0, 0, 0.12);
+    --atp-border-3: rgba(0, 0, 0, 0.20);
+
+    /* WeChat */
+    --atp-wechat-green: #07c160;
+
+    /* Radius */
+    --atp-radius-sm: 4px;
+    --atp-radius-md: 6px;
+    --atp-radius-lg: 8px;
+    --atp-radius-xl: 10px;
+    --atp-radius-pill: 14px;
+
+    /* Font scale - default */
+    --atp-font-scale: 1;
+  }
+
+  /* 大字号模式 */
+  [data-font-size='large'] {
+    --atp-font-scale: 1.18;
+  }
+
+  /* 长辈模式 - 大字号 + 简化 */
+  [data-ui-mode='senior'] {
+    --atp-font-scale: 1.32;
+  }
+
+  body {
+    @apply bg-atp-bg-page text-atp-text-primary font-sans;
+    font-size: calc(16px * var(--atp-font-scale));
+    line-height: 1.7;
+  }
+
+  [data-ui-mode='senior'] body {
+    line-height: 2;
+  }
+
+  /* 字重严格控制 - 仅 400 / 500 */
+  * {
+    font-weight: 400;
+  }
+  b,
+  strong,
+  .font-medium,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: 500;
+  }
+}
+
+@layer components {
+  /* 英文术语 tooltip - 见 spec §3.4 */
+  .atp-term {
+    @apply border-b border-dotted border-atp-text-tertiary cursor-help;
+  }
+}

@@ -1,0 +1,508 @@
+// Avoid The Pit · Prisma schema
+// 按 spec v1.1 §6 实现
+// 修改前请先看 docs/avoidthepit_technical_spec_v1.1.md
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// User & Identity
+// ============================================================
+
+model User {
+  id                  BigInt   @id @default(autoincrement())
+  nanoid              String   @unique @db.VarChar(11)
+  email               String?  @unique
+  username            String?  @unique
+  displayName         String?  @map("display_name")
+  avatarUrl           String?  @map("avatar_url")
+  phoneE164           String?  @map("phone_e164")
+
+  // 地理 (spec §7.2)
+  primaryRegionCode   String   @default("ca-bc") @map("primary_region_code")
+  primaryCityId       String?  @map("primary_city_id")
+
+  // 信任 / 创作者 (spec §8.1)
+  trustScore          Int      @default(0) @map("trust_score")
+  tier                Tier     @default(V0)
+  isCreator           Boolean  @default(false) @map("is_creator")
+  isVerified          Boolean  @default(false) @map("is_verified")
+
+  // 画像 (spec §6.2)
+  identityTags        String[] @map("identity_tags")
+  topicInterests      String[] @map("topic_interests")
+  ageGroup            AgeGroup @default(adult) @map("age_group")
+
+  // 偏好 (v1.1 新增)
+  fontSizeScale       FontSize @default(standard) @map("font_size_scale")
+  uiMode              UiMode   @default(default_) @map("ui_mode")
+  locale              String   @default("zh-CN") @db.VarChar(8)
+  smsAlertsEnabled    Boolean  @default(false) @map("sms_alerts_enabled")
+
+  // 微信 (v1.1 新增)
+  wechatOpenId        String?  @unique @map("wechat_open_id") @db.VarChar(64)
+  wechatUnionId       String?  @map("wechat_union_id") @db.VarChar(64)
+
+  // 家庭 (v1.1 新增)
+  managedByUserId     BigInt?  @map("managed_by_user_id")
+
+  // 时间戳
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+  lastActiveAt        DateTime @default(now()) @map("last_active_at")
+
+  // Relations
+  contents            Content[]
+  ugcReports          UgcReport[]
+  comments            Comment[]
+  followedRegions     UserFollowedRegion[]
+  trustScoreEvents    TrustScoreEvent[]
+  subscriptions       Subscription[]
+  purchases           Purchase[]
+  alertSubscriptions  AlertSubscription[]
+  familyPlansOwned    FamilyPlan[] @relation("FamilyPlanOwner")
+  familyPlanMembers   FamilyPlanMember[]
+  library             UserLibrary[]
+
+  @@map("users")
+  @@index([primaryRegionCode])
+  @@index([wechatOpenId])
+}
+
+enum Tier {
+  V0
+  V1
+  V2
+  V3
+}
+
+enum AgeGroup {
+  youth
+  adult
+  senior
+}
+
+enum FontSize {
+  standard
+  large
+  senior
+}
+
+enum UiMode {
+  default_ @map("default")
+  senior
+}
+
+model UserFollowedRegion {
+  userId       BigInt   @map("user_id")
+  regionCode   String   @map("region_code")
+  note         String?
+  relationTag  String?  @map("relation_tag")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, regionCode])
+  @@map("user_followed_regions")
+}
+
+// ============================================================
+// Content
+// ============================================================
+
+model Content {
+  id                  BigInt        @id @default(autoincrement())
+  nanoid              String        @unique @db.VarChar(11)
+  slug                String        @unique
+  contentType         ContentType   @map("content_type")
+
+  title               String
+  summary             String?
+  body                String        @db.Text
+  coverImageUrl       String?       @map("cover_image_url")
+  videoUrl            String?       @map("video_url")
+
+  authorId            BigInt        @map("author_id")
+  status              ContentStatus @default(draft)
+
+  // 地理 (spec §6.4)
+  geoScope            GeoScope      @map("geo_scope")
+  geoIds              String[]      @map("geo_ids")
+  geoSpecificity     Int           @default(3) @map("geo_specificity")
+
+  // 标签
+  topicTags           String[]      @map("topic_tags")
+  identityRelevance   String[]      @map("identity_relevance")
+
+  // 付费
+  isPaid              Boolean       @default(false) @map("is_paid")
+  priceUsd            Decimal?      @map("price_usd") @db.Decimal(8, 2)
+  paywallPosition     Int?          @map("paywall_position")
+
+  // 应急 (spec §8.5)
+  isEmergency         Boolean       @default(false) @map("is_emergency")
+  emergencyKeywords   String[]      @map("emergency_keywords")
+
+  publishedAt         DateTime?     @map("published_at")
+  scheduledAt         DateTime?     @map("scheduled_at")
+  createdAt           DateTime      @default(now()) @map("created_at")
+  updatedAt           DateTime      @updatedAt @map("updated_at")
+
+  // Metrics (JSON for flexibility)
+  metrics             Json?
+
+  author              User          @relation(fields: [authorId], references: [id])
+  ugcReport           UgcReport?
+  comments            Comment[]
+  disputes            UgcDispute[]
+  purchases           Purchase[]
+  library             UserLibrary[]
+
+  @@map("contents")
+  @@index([authorId])
+  @@index([status, publishedAt(sort: Desc)])
+  @@index([geoScope])
+}
+
+enum ContentType {
+  article
+  video
+  scam_file
+  ugc_report
+  topic
+}
+
+enum ContentStatus {
+  draft
+  review
+  published
+  scheduled
+  archived
+  removed
+}
+
+enum GeoScope {
+  city
+  metro
+  province
+  country
+  continent
+}
+
+// ============================================================
+// UGC Report
+// ============================================================
+
+model UgcReport {
+  contentId               BigInt          @id @map("content_id")
+  role                    UgcRole
+  incidentLocationPrecise Json?           @map("incident_location_precise")
+  incidentLocationPublic  String?         @map("incident_location_public")
+  incidentDate            DateTime?       @map("incident_date")
+  lossUsd                 Decimal?        @map("loss_usd") @db.Decimal(12, 2)
+  isAnonymized            Boolean         @default(true) @map("is_anonymized")
+  namedEntitiesCheck      Boolean         @default(false) @map("named_entities_check")
+  reviewStatus            ReviewStatus    @default(pending) @map("review_status")
+  reviewerId              BigInt?         @map("reviewer_id")
+  reviewedAt              DateTime?       @map("reviewed_at")
+  reviewerNotes           String?         @map("reviewer_notes") @db.Text
+  authorId                BigInt          @map("author_id")
+
+  content                 Content         @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  author                  User            @relation(fields: [authorId], references: [id])
+
+  @@map("ugc_reports")
+}
+
+enum UgcRole {
+  victim
+  family
+  witness
+  researcher
+}
+
+enum ReviewStatus {
+  pending
+  approved
+  rejected
+  needs_edit
+}
+
+// ============================================================
+// UGC Dispute (v1.1 新增 - spec §8.2.5)
+// ============================================================
+
+model UgcDispute {
+  id                    BigInt          @id @default(autoincrement())
+  contentId             BigInt          @map("content_id")
+  submitterEmail        String          @map("submitter_email")
+  submitterProof        String?         @map("submitter_proof") @db.Text
+  status                DisputeStatus   @default(open)
+  legalReviewRequired   Boolean         @default(false) @map("legal_review_required")
+  resolutionNotes       String?         @map("resolution_notes") @db.Text
+  openedAt              DateTime        @default(now()) @map("opened_at")
+  resolvedAt            DateTime?       @map("resolved_at")
+
+  content               Content         @relation(fields: [contentId], references: [id])
+
+  @@map("ugc_disputes")
+}
+
+enum DisputeStatus {
+  open
+  under_review
+  escalated_legal
+  resolved_kept
+  resolved_edited
+  resolved_removed
+}
+
+// ============================================================
+// Trust Score Events (v1.1 新增 - spec §8.7)
+// ============================================================
+
+model TrustScoreEvent {
+  id              BigInt    @id @default(autoincrement())
+  userId          BigInt    @map("user_id")
+  delta           Int
+  reasonCode      String    @map("reason_code") @db.VarChar(64)
+  reasonText      String    @map("reason_text") @db.Text
+  ruleSection     String?   @map("rule_section") @db.VarChar(64)
+  appealStatus    AppealStatus @default(none) @map("appeal_status")
+  appealDeadline  DateTime? @map("appeal_deadline")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("trust_score_events")
+  @@index([userId, createdAt(sort: Desc)])
+}
+
+enum AppealStatus {
+  none
+  submitted
+  reviewing
+  resolved
+}
+
+// ============================================================
+// Comments
+// ============================================================
+
+model Comment {
+  id                 BigInt   @id @default(autoincrement())
+  contentId          BigInt   @map("content_id")
+  userId             BigInt   @map("user_id")
+  parentId           BigInt?  @map("parent_id")
+  body               String   @db.Text
+  status             CommentStatus @default(visible)
+  isPinned           Boolean  @default(false) @map("is_pinned")
+  isCreatorResponse  Boolean  @default(false) @map("is_creator_response")
+  upvotes            Int      @default(0)
+  downvotes          Int      @default(0)
+  highQualityScore   Float    @default(0) @map("high_quality_score")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  content            Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  user               User     @relation(fields: [userId], references: [id])
+  parent             Comment? @relation("CommentReplies", fields: [parentId], references: [id])
+  replies            Comment[] @relation("CommentReplies")
+
+  @@map("comments")
+  @@index([contentId, highQualityScore(sort: Desc)])
+}
+
+enum CommentStatus {
+  visible
+  hidden
+  removed
+}
+
+// ============================================================
+// Regions & Cities
+// ============================================================
+
+model Region {
+  code              String   @id @db.VarChar(16)
+  countryCode       String   @map("country_code") @db.VarChar(4)
+  level             RegionLevel
+  parentCode        String?  @map("parent_code")
+  displayNameZh     String   @map("display_name_zh")
+  displayNameEn     String   @map("display_name_en")
+  ietfLocale        String?  @map("ietf_locale")
+  activeUserCount   Int      @default(0) @map("active_user_count")
+  lastRecomputedAt  DateTime @default(now()) @map("last_recomputed_at")
+
+  cities            City[]
+
+  @@map("regions")
+}
+
+enum RegionLevel {
+  country
+  province
+  state
+  metro
+  city
+}
+
+model City {
+  id            String   @id @db.VarChar(64)
+  code          String   @unique @db.VarChar(64)
+  nameZh        String   @map("name_zh")
+  nameEn        String   @map("name_en")
+  regionCode    String   @map("region_code")
+  centroidLat   Float    @map("centroid_lat")
+  centroidLng   Float    @map("centroid_lng")
+  bounds        Json?
+
+  region        Region   @relation(fields: [regionCode], references: [code])
+
+  @@map("cities")
+  @@index([regionCode])
+}
+
+// ============================================================
+// Subscriptions & Payments
+// ============================================================
+
+model Subscription {
+  id                  BigInt   @id @default(autoincrement())
+  userId              BigInt   @map("user_id")
+  plan                Plan
+  status              SubscriptionStatus
+  priceUsd            Decimal  @map("price_usd") @db.Decimal(8, 2)
+  stripeSubscriptionId String? @unique @map("stripe_subscription_id")
+  startedAt           DateTime @default(now()) @map("started_at")
+  currentPeriodEnd    DateTime @map("current_period_end")
+  cancelAt            DateTime? @map("cancel_at")
+
+  user                User     @relation(fields: [userId], references: [id])
+
+  @@map("subscriptions")
+}
+
+enum Plan {
+  trial_7d
+  monthly
+  annual
+  family_monthly
+  family_annual
+}
+
+enum SubscriptionStatus {
+  active
+  trialing
+  past_due
+  canceled
+  unpaid
+}
+
+model Purchase {
+  id          BigInt   @id @default(autoincrement())
+  userId      BigInt   @map("user_id")
+  contentId   BigInt   @map("content_id")
+  priceUsd    Decimal  @map("price_usd") @db.Decimal(8, 2)
+  purchasedAt DateTime @default(now()) @map("purchased_at")
+
+  user        User     @relation(fields: [userId], references: [id])
+  content     Content  @relation(fields: [contentId], references: [id])
+
+  @@unique([userId, contentId])
+  @@map("purchases")
+}
+
+// ============================================================
+// Family Plans (v1.1 新增 - spec §8.3)
+// ============================================================
+
+model FamilyPlan {
+  id                    BigInt   @id @default(autoincrement())
+  ownerUserId           BigInt   @map("owner_user_id")
+  planType              Plan     @map("plan_type")
+  maxMembers            Int      @default(4) @map("max_members")
+  parentSlotUsed        Boolean  @default(false) @map("parent_slot_used")
+  stripeSubscriptionId  String?  @unique @map("stripe_subscription_id")
+  currentPeriodEnd      DateTime @map("current_period_end")
+
+  owner                 User     @relation("FamilyPlanOwner", fields: [ownerUserId], references: [id])
+  members               FamilyPlanMember[]
+
+  @@map("family_plans")
+}
+
+model FamilyPlanMember {
+  familyPlanId  BigInt              @map("family_plan_id")
+  userId        BigInt              @map("user_id")
+  role          FamilyMemberRole
+  joinedAt      DateTime            @default(now()) @map("joined_at")
+  removedAt     DateTime?           @map("removed_at")
+
+  familyPlan    FamilyPlan          @relation(fields: [familyPlanId], references: [id])
+  user          User                @relation(fields: [userId], references: [id])
+
+  @@id([familyPlanId, userId])
+  @@map("family_plan_members")
+}
+
+enum FamilyMemberRole {
+  owner
+  member
+  parent_slot
+}
+
+// ============================================================
+// Library (v1.1 新增 - 已购 / 已订阅 / 已收藏)
+// ============================================================
+
+model UserLibrary {
+  userId        BigInt          @map("user_id")
+  contentId     BigInt          @map("content_id")
+  acquiredVia   AcquiredVia     @map("acquired_via")
+  acquiredAt    DateTime        @default(now()) @map("acquired_at")
+  expiresAt     DateTime?       @map("expires_at")
+
+  user          User            @relation(fields: [userId], references: [id])
+  content       Content         @relation(fields: [contentId], references: [id])
+
+  @@id([userId, contentId])
+  @@map("user_library")
+}
+
+enum AcquiredVia {
+  purchase
+  subscription
+  gift
+  bookmark
+}
+
+// ============================================================
+// Alerts (spec §6)
+// ============================================================
+
+model AlertSubscription {
+  id                BigInt    @id @default(autoincrement())
+  userId            BigInt    @map("user_id")
+  regionCode        String    @map("region_code")
+  cityRadiusKm      Int?      @map("city_radius_km")
+  severityThreshold AlertSeverity @default(med) @map("severity_threshold")
+  active            Boolean   @default(true)
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  user              User      @relation(fields: [userId], references: [id])
+
+  @@map("alert_subscriptions")
+}
+
+enum AlertSeverity {
+  low
+  med
+  high
+}

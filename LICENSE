@@ -1,0 +1,17 @@
+Copyright (c) 2026 Avoid The Pit Inc.
+
+All rights reserved.
+
+This is a private project. No part of this codebase may be copied,
+modified, distributed, or used in any form without explicit written
+permission from Avoid The Pit Inc.
+
+If you have permission to use this code, you agree to:
+1. Not reproduce or share with third parties
+2. Not use for commercial purposes outside Avoid The Pit Inc.
+3. Maintain confidentiality of all internal documents, especially:
+   - Technical specifications in docs/
+   - Design mockups in design-references/
+   - Algorithm details (recommendation weights, trust scoring)
+
+For licensing inquiries: legal@avoidthepit.com
