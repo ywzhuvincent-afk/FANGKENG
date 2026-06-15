@@ -21,9 +21,14 @@ export function ATPEmergencyBanner({
   ctaHref = '#',
 }: EmergencyBannerProps) {
   return (
-    <div className="border-y border-[rgba(255,44,85,0.18)] bg-atp-accent-bg px-4 py-3">
+    <div className="border-y border-[rgba(255,78,106,0.22)] bg-atp-accent-bg px-4 py-3">
       <div className="flex gap-3">
-        <IconAlertTriangle className="mt-0.5 size-5 shrink-0 text-atp-accent-dark" aria-hidden="true" stroke={1.8} />
+        <span
+          className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-atp-accent text-white"
+          aria-hidden="true"
+        >
+          <IconAlertTriangle className="size-4" stroke={2} />
+        </span>
         <div className="flex-1">
           <div className="font-medium text-atp-accent-dark mb-1">
             紧急提醒: {TRIGGER_TITLES[trigger]}
@@ -35,7 +40,7 @@ export function ATPEmergencyBanner({
           </ol>
           <a
             href={ctaHref}
-            className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-atp-accent underline"
+            className="mt-2 inline-flex items-center gap-1 rounded-atp-pill bg-atp-accent px-3 py-1.5 text-sm font-medium text-white"
           >
             {ctaLabel}
             <IconChevronRight className="size-4" aria-hidden="true" stroke={1.8} />
