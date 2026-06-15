@@ -4,11 +4,11 @@
 
 @layer base {
   :root {
-    /* Backgrounds */
-    --atp-bg-page: #f5f1ea;
-    --atp-bg-card: #fffefb;
-    --atp-bg-soft: #faf6ee;
-    --atp-bg-divider: #faf6ee;
+    /* Backgrounds — 暖米色基底，跟设计稿一致 */
+    --atp-bg-page: #fcf7f0;
+    --atp-bg-card: #ffffff;
+    --atp-bg-soft: #faf7f2;
+    --atp-bg-divider: #f5efe8;
 
     /* Text */
     --atp-text-primary: #1a1a1a;
@@ -16,40 +16,42 @@
     --atp-text-tertiary: #8c8c8c;
     --atp-text-disabled: #c0c0c0;
 
-    /* Accent - 红色 */
-    --atp-accent: #ff2c55;
-    --atp-accent-dark: #c81e3f;
-    --atp-accent-bg: #fff1f4;
+    /* Accent — 暖珊瑚粉，更友好不刺眼 */
+    --atp-accent: #ff4e6a;
+    --atp-accent-dark: #c8392f;
+    --atp-accent-bg: #ffe5de;
+    --atp-accent-soft: #fff1f4;
 
-    /* Trust - 海军蓝 */
+    /* Trust — 海军蓝 */
     --atp-trust: #1a2e4a;
     --atp-trust-light: #3a5278;
 
-    /* Premium - 金色 */
-    --atp-premium: #c9a356;
-    --atp-premium-bg: #fbf5e8;
-    --atp-premium-border: #e6cb89;
+    /* Premium — 金色（更暖） */
+    --atp-premium: #ba7517;
+    --atp-premium-bg: #fff2d6;
+    --atp-premium-border: #ef9f27;
 
     /* Status */
-    --atp-success: #18a058;
-    --atp-success-bg: #e8f4ec;
+    --atp-success: #0f6e56;
+    --atp-success-bg: #e1f5ee;
     --atp-warning: #f0993e;
     --atp-warning-bg: #fff4e5;
 
     /* Borders */
     --atp-border-1: rgba(0, 0, 0, 0.06);
     --atp-border-2: rgba(0, 0, 0, 0.12);
-    --atp-border-3: rgba(0, 0, 0, 0.20);
+    --atp-border-3: rgba(0, 0, 0, 0.2);
 
     /* WeChat */
     --atp-wechat-green: #07c160;
 
-    /* Radius */
-    --atp-radius-sm: 4px;
-    --atp-radius-md: 6px;
-    --atp-radius-lg: 8px;
-    --atp-radius-xl: 10px;
-    --atp-radius-pill: 14px;
+    /* Radius — 跟设计稿对齐，pill 是真胶囊 */
+    --atp-radius-sm: 6px;
+    --atp-radius-md: 10px;
+    --atp-radius-lg: 14px;
+    --atp-radius-xl: 18px;
+    --atp-radius-2xl: 24px;
+    --atp-radius-pill: 9999px;
 
     /* Font scale - default */
     --atp-font-scale: 1;
