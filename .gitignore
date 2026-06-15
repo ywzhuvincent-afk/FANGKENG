@@ -62,5 +62,6 @@ docs/private-notes/
 *.dump
 
 # Build artifacts
+artifacts/
 *.tsbuildinfo
 next-env.d.ts

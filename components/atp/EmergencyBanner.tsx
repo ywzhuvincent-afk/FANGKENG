@@ -1,10 +1,4 @@
-/**
- * ATPEmergencyBanner - 应急横条
- * spec v1.1 §3.2 + §8.5
- *
- * 出现位置:搜索结果顶部、文章正文顶部
- * 触发关键词按年龄段差异化(v1.1 §8.5)
- */
+import { IconAlertTriangle, IconChevronRight } from '@tabler/icons-react';
 
 interface EmergencyBannerProps {
   trigger:
@@ -27,12 +21,12 @@ export function ATPEmergencyBanner({
   ctaHref = '#',
 }: EmergencyBannerProps) {
   return (
-    <div className="bg-atp-accent-bg border-y border-[var(--atp-accent)]/15 px-4 py-3">
+    <div className="border-y border-[rgba(255,44,85,0.18)] bg-atp-accent-bg px-4 py-3">
       <div className="flex gap-3">
-        <i className="ti ti-alert-triangle-filled text-xl text-atp-accent-dark mt-0.5" aria-hidden="true" />
+        <IconAlertTriangle className="mt-0.5 size-5 shrink-0 text-atp-accent-dark" aria-hidden="true" stroke={1.8} />
         <div className="flex-1">
           <div className="font-medium text-atp-accent-dark mb-1">
-            ⚡ 紧急?{TRIGGER_TITLES[trigger]}
+            紧急提醒: {TRIGGER_TITLES[trigger]}
           </div>
           <ol className="text-sm text-atp-text-primary space-y-0.5 list-decimal list-inside leading-relaxed">
             {steps.map((step, i) => (
@@ -41,9 +35,10 @@ export function ATPEmergencyBanner({
           </ol>
           <a
             href={ctaHref}
-            className="inline-block mt-2 text-sm font-medium text-atp-accent underline"
+            className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-atp-accent underline"
           >
-            ⏵ {ctaLabel}
+            {ctaLabel}
+            <IconChevronRight className="size-4" aria-hidden="true" stroke={1.8} />
           </a>
         </div>
       </div>
