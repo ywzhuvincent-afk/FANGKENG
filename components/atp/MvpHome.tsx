@@ -35,6 +35,23 @@ import {
 const allCategory = '全部';
 const emergencySteps = ['暂停转账或提供验证码', '截图保存聊天和链接', '从官网或公开电话重新核验'];
 
+function ATPLogoMark({ size = 32 }: { size?: number }) {
+  return (
+    <span
+      className="inline-flex items-center justify-center bg-atp-accent text-white font-serif font-medium"
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size * 0.3,
+        fontSize: size * 0.56,
+      }}
+      aria-hidden="true"
+    >
+      坑
+    </span>
+  );
+}
+
 export function MvpHome() {
   const [regionCode, setRegionCode] = useState(getDefaultRegion().code);
   const [category, setCategory] = useState(allCategory);
@@ -55,16 +72,21 @@ export function MvpHome() {
   const hotItems = filteredItems.slice(0, 4);
 
   return (
-    <main className="min-h-screen bg-[#f7f7f5] text-atp-text-primary">
+    <main className="min-h-screen bg-atp-bg-page text-atp-text-primary">
       <div className="mx-auto grid w-full max-w-7xl grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)_320px] lg:gap-6 lg:px-6">
         <DesktopNav />
 
         <section className="min-w-0 pb-24 lg:pb-10">
-          <header className="sticky top-0 z-30 border-b border-[var(--atp-border-1)] bg-[#f7f7f5]/95 px-4 pb-3 pt-4 backdrop-blur lg:top-0 lg:px-0">
+          <header className="sticky top-0 z-30 border-b border-[var(--atp-border-1)] bg-atp-bg-page/95 px-4 pb-3 pt-4 backdrop-blur lg:top-0 lg:px-0">
             <div className="flex items-center justify-between gap-3">
-              <Link href="/" className="min-w-0">
-                <div className="text-xs text-atp-text-tertiary">Avoid The Pit</div>
-                <div className="text-xl font-medium tracking-normal">避坑指南</div>
+              <Link href="/" className="flex min-w-0 items-center gap-2.5">
+                <ATPLogoMark size={36} />
+                <div className="min-w-0 leading-tight">
+                  <div className="text-[20px] font-medium tracking-wide">避坑指南</div>
+                  <div className="text-[10.5px] uppercase tracking-[0.08em] text-atp-text-tertiary">
+                    North American Chinese
+                  </div>
+                </div>
               </Link>
               <ATPFontSizeControl />
             </div>
@@ -75,9 +97,9 @@ export function MvpHome() {
                   key={region.code}
                   type="button"
                   onClick={() => setRegionCode(region.code)}
-                  className={`inline-flex min-h-9 shrink-0 items-center gap-1 rounded-atp-pill border px-3 text-sm ${
+                  className={`inline-flex min-h-9 shrink-0 items-center gap-1 rounded-atp-pill border px-3.5 text-sm transition ${
                     region.code === regionCode
-                      ? 'border-atp-text-primary bg-atp-text-primary text-white'
+                      ? 'border-atp-accent bg-atp-accent text-white'
                       : 'border-[var(--atp-border-1)] bg-white text-atp-text-secondary'
                   }`}
                 >
@@ -90,17 +112,21 @@ export function MvpHome() {
             <div className="mt-3 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
               <label className="relative min-w-0">
                 <span className="sr-only">搜索避坑内容</span>
-                <IconSearch className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-atp-text-tertiary" aria-hidden="true" stroke={1.8} />
+                <IconSearch
+                  className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-atp-text-tertiary"
+                  aria-hidden="true"
+                  stroke={1.8}
+                />
                 <input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                   className="min-h-11 w-full rounded-atp-pill border border-[var(--atp-border-1)] bg-white pl-10 pr-4 text-base outline-none focus:border-atp-accent"
-                  placeholder="搜 gift card / 押金 / offer"
+                  placeholder="今天想避什么坑？试试 gift card / 押金"
                 />
               </label>
               <Link
                 href="/scam-files"
-                className="hidden min-h-11 items-center justify-center gap-2 rounded-atp-pill bg-atp-text-primary px-4 text-sm font-medium text-white sm:inline-flex"
+                className="hidden min-h-11 items-center justify-center gap-2 rounded-atp-pill bg-atp-accent px-5 text-sm font-medium text-white sm:inline-flex"
               >
                 档案库
                 <IconChevronRight className="size-4" aria-hidden="true" stroke={1.8} />
@@ -126,7 +152,7 @@ export function MvpHome() {
                   key={item}
                   type="button"
                   onClick={() => setCategory(item)}
-                  className={`min-h-10 shrink-0 rounded-atp-pill border px-4 text-sm ${
+                  className={`min-h-10 shrink-0 rounded-atp-pill border px-4 text-sm transition ${
                     category === item
                       ? 'border-atp-accent bg-atp-accent text-white'
                       : 'border-[var(--atp-border-1)] bg-white text-atp-text-secondary'
@@ -139,8 +165,12 @@ export function MvpHome() {
 
             {featuredItem ? <FeaturedFeedCard item={featuredItem} /> : null}
 
-            <section className="overflow-hidden rounded-atp-xl border border-[rgba(255,44,85,0.14)] bg-white">
-              <ATPEmergencyBanner trigger="wire_transfer" steps={emergencySteps} ctaHref="/articles/rental-deposit-before-transfer" />
+            <section className="overflow-hidden rounded-atp-xl border border-[rgba(255,78,106,0.18)] bg-white">
+              <ATPEmergencyBanner
+                trigger="wire_transfer"
+                steps={emergencySteps}
+                ctaHref="/articles/rental-deposit-before-transfer"
+              />
             </section>
 
             {feedItems.length > 0 ? (
@@ -172,9 +202,14 @@ export function MvpHome() {
 function DesktopNav() {
   return (
     <aside className="sticky top-0 hidden h-screen min-w-0 border-r border-[var(--atp-border-1)] py-6 pr-4 lg:block">
-      <Link href="/" className="block">
-        <div className="text-xs text-atp-text-tertiary">Avoid The Pit</div>
-        <div className="text-2xl font-medium">避坑指南</div>
+      <Link href="/" className="flex items-center gap-2.5">
+        <ATPLogoMark size={40} />
+        <div className="leading-tight">
+          <div className="text-[22px] font-medium tracking-wide">避坑指南</div>
+          <div className="text-[10px] uppercase tracking-[0.08em] text-atp-text-tertiary">
+            North American Chinese
+          </div>
+        </div>
       </Link>
       <nav className="mt-8 space-y-2">
         <DesktopNavItem href="/" icon={<IconHome />} label="首页" active />
@@ -209,7 +244,11 @@ function DesktopNavItem({
 }) {
   const content = (
     <>
-      <span className="flex size-9 items-center justify-center rounded-atp-lg bg-white text-atp-text-secondary">
+      <span
+        className={`flex size-9 items-center justify-center rounded-atp-md ${
+          active ? 'bg-white/15' : 'bg-white text-atp-text-secondary'
+        }`}
+      >
         {cloneIcon(icon)}
       </span>
       <span>{label}</span>
@@ -219,7 +258,7 @@ function DesktopNavItem({
 
   if (disabled) {
     return (
-      <div className="flex min-h-12 items-center gap-3 rounded-atp-xl px-2 text-sm text-atp-text-tertiary">
+      <div className="flex min-h-12 items-center gap-3 rounded-atp-lg px-2 text-sm text-atp-text-tertiary">
         {content}
       </div>
     );
@@ -228,8 +267,10 @@ function DesktopNavItem({
   return (
     <Link
       href={href}
-      className={`flex min-h-12 items-center gap-3 rounded-atp-xl px-2 text-sm ${
-        active ? 'bg-atp-text-primary text-white' : 'text-atp-text-secondary hover:bg-white'
+      className={`flex min-h-12 items-center gap-3 rounded-atp-lg px-2 text-sm ${
+        active
+          ? 'bg-atp-accent text-white'
+          : 'text-atp-text-secondary hover:bg-white'
       }`}
     >
       {content}
@@ -239,20 +280,31 @@ function DesktopNavItem({
 
 function FeaturedFeedCard({ item }: { item: ContentSeed }) {
   return (
-    <Link href={`/articles/${item.slug}`} className="block overflow-hidden rounded-atp-xl bg-atp-text-primary text-white shadow-sm">
+    <Link
+      href={`/articles/${item.slug}`}
+      className="block overflow-hidden rounded-atp-2xl bg-atp-text-primary text-white"
+    >
       <div className={`relative min-h-[360px] p-5 ${coverToneClass(item.coverTone)}`}>
-        <div className="absolute right-4 top-4 inline-flex items-center gap-1 rounded-atp-pill bg-black/25 px-3 py-1 text-xs text-white">
-          {item.displayFormat === 'clip' ? <IconPlayerPlay className="size-4" aria-hidden="true" stroke={1.8} /> : <IconLayoutGrid className="size-4" aria-hidden="true" stroke={1.8} />}
+        <div className="absolute right-4 top-4 inline-flex items-center gap-1 rounded-atp-pill bg-black/30 px-3 py-1 text-xs text-white">
+          {item.displayFormat === 'clip' ? (
+            <IconPlayerPlay className="size-4" aria-hidden="true" stroke={1.8} />
+          ) : (
+            <IconLayoutGrid className="size-4" aria-hidden="true" stroke={1.8} />
+          )}
           {item.durationLabel ?? formatLabel(item.displayFormat)}
         </div>
         <div className="flex h-full min-h-[320px] flex-col justify-between">
-          <div className="max-w-[220px] rounded-atp-xl bg-white/12 p-3 backdrop-blur">
-            <div className="text-xs opacity-80">{item.category} · {riskLabel(item.riskLevel)}</div>
+          <div className="max-w-[240px] rounded-atp-lg bg-white/15 p-3 backdrop-blur">
+            <div className="text-xs opacity-80">
+              {item.category} · {riskLabel(item.riskLevel)}
+            </div>
             <div className="mt-1 text-lg font-medium leading-tight">{item.hook}</div>
           </div>
           <div>
             <div className="mb-3 flex items-center gap-2 text-sm opacity-90">
-              <span className="flex size-8 items-center justify-center rounded-full bg-white/20">{item.authorName.slice(0, 1)}</span>
+              <span className="flex size-8 items-center justify-center rounded-full bg-white/22">
+                {item.authorName.slice(0, 1)}
+              </span>
               <span>{item.authorName}</span>
             </div>
             <h2 className="text-2xl font-medium leading-tight">{item.title}</h2>
@@ -267,12 +319,17 @@ function FeaturedFeedCard({ item }: { item: ContentSeed }) {
 
 function FeedCard({ item }: { item: ContentSeed }) {
   return (
-    <Link href={`/articles/${item.slug}`} className="block min-w-0 overflow-hidden rounded-atp-xl border border-[var(--atp-border-1)] bg-white shadow-sm">
+    <Link
+      href={`/articles/${item.slug}`}
+      className="block min-w-0 overflow-hidden rounded-atp-xl border border-[var(--atp-border-1)] bg-white"
+    >
       <div className={`relative min-h-[190px] p-4 text-white ${coverToneClass(item.coverTone)}`}>
         <div className="flex items-center justify-between gap-2">
-          <span className="rounded-atp-pill bg-white/18 px-3 py-1 text-xs">{formatLabel(item.displayFormat)}</span>
+          <span className="rounded-atp-pill bg-white/22 px-3 py-1 text-xs">
+            {formatLabel(item.displayFormat)}
+          </span>
           {item.durationLabel ? (
-            <span className="inline-flex items-center gap-1 rounded-atp-pill bg-black/22 px-2 py-1 text-xs">
+            <span className="inline-flex items-center gap-1 rounded-atp-pill bg-black/30 px-2.5 py-1 text-xs">
               <IconPlayerPlay className="size-3.5" aria-hidden="true" stroke={1.8} />
               {item.durationLabel}
             </span>
@@ -309,7 +366,11 @@ function StatsBar({ item, light }: { item: ContentSeed; light?: boolean }) {
   return (
     <div className={`mt-4 flex items-center gap-4 text-xs ${className}`}>
       <span className="inline-flex items-center gap-1">
-        <IconHeart className="size-4" aria-hidden="true" stroke={1.8} />
+        <IconHeart
+          className={`size-4 ${light ? '' : 'text-atp-accent'}`}
+          aria-hidden="true"
+          stroke={1.8}
+        />
         {compactNumber(item.stats.likes)}
       </span>
       <span className="inline-flex items-center gap-1">
@@ -324,7 +385,13 @@ function StatsBar({ item, light }: { item: ContentSeed; light?: boolean }) {
   );
 }
 
-function TrendPanel({ selectedRegion, hotItems }: { selectedRegion: string; hotItems: ContentSeed[] }) {
+function TrendPanel({
+  selectedRegion,
+  hotItems,
+}: {
+  selectedRegion: string;
+  hotItems: ContentSeed[];
+}) {
   return (
     <>
       <section className="rounded-atp-xl border border-[var(--atp-border-1)] bg-white p-4">
@@ -334,13 +401,19 @@ function TrendPanel({ selectedRegion, hotItems }: { selectedRegion: string; hotI
         </div>
         <div className="space-y-3">
           {hotItems.map((item, index) => (
-            <Link key={item.slug} href={`/articles/${item.slug}`} className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 rounded-atp-lg bg-[#f7f7f5] p-3">
+            <Link
+              key={item.slug}
+              href={`/articles/${item.slug}`}
+              className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 rounded-atp-lg bg-atp-bg-soft p-3"
+            >
               <span className="flex size-7 items-center justify-center rounded-atp-md bg-white text-sm font-medium text-atp-accent">
                 {index + 1}
               </span>
               <span className="min-w-0">
                 <span className="block truncate text-sm font-medium">{item.hook}</span>
-                <span className="mt-1 block text-xs text-atp-text-tertiary">{compactNumber(item.stats.saves)} 人收藏</span>
+                <span className="mt-1 block text-xs text-atp-text-tertiary">
+                  {compactNumber(item.stats.saves)} 人收藏
+                </span>
               </span>
             </Link>
           ))}
@@ -351,9 +424,17 @@ function TrendPanel({ selectedRegion, hotItems }: { selectedRegion: string; hotI
         <h2 className="mb-3 font-medium">热门专题</h2>
         <div className="grid grid-cols-2 gap-2">
           {categories.map((item) => (
-            <Link key={item} href={`/topics/${encodeURIComponent(item)}`} className="flex min-h-11 items-center justify-between rounded-atp-lg bg-[#f7f7f5] px-3 text-sm">
+            <Link
+              key={item}
+              href={`/topics/${encodeURIComponent(item)}`}
+              className="flex min-h-11 items-center justify-between rounded-atp-lg bg-atp-bg-soft px-3 text-sm"
+            >
               {item}
-              <IconChevronRight className="size-4 text-atp-text-tertiary" aria-hidden="true" stroke={1.8} />
+              <IconChevronRight
+                className="size-4 text-atp-text-tertiary"
+                aria-hidden="true"
+                stroke={1.8}
+              />
             </Link>
           ))}
         </div>
@@ -363,7 +444,10 @@ function TrendPanel({ selectedRegion, hotItems }: { selectedRegion: string; hotI
         <h2 className="mb-3 font-medium">即将开放</h2>
         <div className="space-y-2 text-sm text-atp-text-secondary">
           {['发布避坑笔记', '消息提醒', '我的收藏'].map((label) => (
-            <div key={label} className="flex min-h-10 items-center justify-between rounded-atp-lg bg-white/60 px-3">
+            <div
+              key={label}
+              className="flex min-h-10 items-center justify-between rounded-atp-lg bg-white/60 px-3"
+            >
               <span>{label}</span>
               <span className="inline-flex items-center gap-1 text-xs text-atp-text-tertiary">
                 <IconClock className="size-3.5" aria-hidden="true" stroke={1.8} />
@@ -411,15 +495,23 @@ function MobileTab({
       <span
         className={`flex items-center justify-center ${
           primary
-            ? 'mx-auto -mt-5 size-12 rounded-full bg-atp-accent text-white shadow-lg'
-            : 'mx-auto size-6'
+            ? 'mx-auto -mt-3 size-11 rounded-atp-lg bg-atp-accent text-white'
+            : `mx-auto size-6 ${active ? 'text-atp-accent' : ''}`
         }`}
       >
         {cloneIcon(icon, primary ? 'size-6' : 'size-5')}
       </span>
-      <span className={`mt-1 block text-center text-[11px] ${active ? 'font-medium text-atp-text-primary' : 'text-atp-text-tertiary'}`}>
-        {label}
-      </span>
+      {!primary ? (
+        <span
+          className={`mt-1 block text-center text-[11px] ${
+            active ? 'font-medium text-atp-accent' : 'text-atp-text-tertiary'
+          }`}
+        >
+          {label}
+        </span>
+      ) : (
+        <span className="mt-1 block h-[11px]" aria-hidden="true" />
+      )}
     </>
   );
 
@@ -445,9 +537,9 @@ function RiskBadge({ level }: { level: ContentSeed['riskLevel'] }) {
       ? 'bg-atp-accent-bg text-atp-accent-dark'
       : level === 'medium'
         ? 'bg-atp-warning-bg text-atp-text-primary'
-        : 'bg-atp-success-bg text-atp-text-primary';
+        : 'bg-atp-success-bg text-atp-success';
 
-  return <span className={`rounded-atp-sm px-2 py-1 ${className}`}>{label}</span>;
+  return <span className={`rounded-atp-pill px-2.5 py-0.5 font-medium ${className}`}>{label}</span>;
 }
 
 function riskLabel(level: ContentSeed['riskLevel']) {
@@ -468,14 +560,15 @@ function compactNumber(value: number) {
   return String(value);
 }
 
+// 改：从纯色块换成同色系渐变，跟设计稿对齐
 function coverToneClass(tone: ContentSeed['coverTone']) {
   const classes: Record<ContentSeed['coverTone'], string> = {
-    rose: 'bg-atp-accent',
-    navy: 'bg-atp-trust',
-    gold: 'bg-atp-premium',
-    green: 'bg-atp-success',
-    ink: 'bg-[#202020]',
-    sky: 'bg-[#2f6f9f]',
+    rose: 'bg-gradient-to-br from-[#FF6E83] to-[#C8392F]',
+    navy: 'bg-gradient-to-br from-[#1A2B4A] to-[#0C1A2E]',
+    gold: 'bg-gradient-to-br from-[#C9882A] to-[#854F0B]',
+    green: 'bg-gradient-to-br from-[#0F6E56] to-[#04342C]',
+    ink: 'bg-gradient-to-br from-[#2A2A2A] to-[#0A0A0A]',
+    sky: 'bg-gradient-to-br from-[#2F6F9F] to-[#0C447C]',
   };
 
   return classes[tone];
