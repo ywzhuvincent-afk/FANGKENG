@@ -25,6 +25,7 @@ const config: Config = {
           DEFAULT: 'var(--atp-accent)',
           dark: 'var(--atp-accent-dark)',
           bg: 'var(--atp-accent-bg)',
+          soft: 'var(--atp-accent-soft)',
         },
         'atp-trust': {
           DEFAULT: 'var(--atp-trust)',
@@ -52,6 +53,7 @@ const config: Config = {
         'atp-md': 'var(--atp-radius-md)',
         'atp-lg': 'var(--atp-radius-lg)',
         'atp-xl': 'var(--atp-radius-xl)',
+        'atp-2xl': 'var(--atp-radius-2xl)',
         'atp-pill': 'var(--atp-radius-pill)',
       },
       fontFamily: {
